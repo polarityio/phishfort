@@ -1,0 +1,31 @@
+{
+  "root": {
+    "path": "",
+    "on_null": "return_empty"
+  },
+  "pipeline": [
+    { "op": "copy", "from": "incidentId",           "to": "reduced_results.incident_id" },
+    { "op": "copy", "from": "subject",               "to": "reduced_results.subject" },
+    { "op": "copy", "from": "statusLabel",           "to": "reduced_results.status" },
+    { "op": "copy", "from": "incidentStateLabel",    "to": "reduced_results.incident_state" },
+    { "op": "copy", "from": "incidentStateMessage",  "to": "reduced_results.incident_state_note" },
+    { "op": "copy", "from": "incidentClass",         "to": "reduced_results.incident_class" },
+    { "op": "copy", "from": "incidentType",          "to": "reduced_results.incident_type" },
+    { "op": "copy", "from": "safeDomain",            "to": "reduced_results.protected_brand" },
+    { "op": "copy", "from": "registrarName",         "to": "reduced_results.registrar" },
+    { "op": "copy", "from": "source",                "to": "reduced_results.source" },
+    { "op": "copy", "from": "reportedBy",            "to": "reduced_results.reported_by" },
+    { "op": "copy", "from": "reportedDate",          "to": "reduced_results.reported_date" },
+    { "op": "copy", "from": "taxonomyName",          "to": "reduced_results.taxonomy_name" },
+    { "op": "copy", "from": "taxonomyThreatType",    "to": "reduced_results.taxonomy_threat_type" },
+    { "op": "copy", "from": "hasIncident",           "to": "reduced_results.has_incident" },
+    {
+      "op": "prune",
+      "strategy": "empty_values",
+      "target": "reduced_results"
+    }
+  ],
+  "output": {
+    "result": "$working.reduced_results"
+  }
+}

@@ -1,0 +1,297 @@
+{{! PhishFort Overlay Block }}
+<div class="pf-container">
+
+  {{#if details.hasIncident}}
+
+    {{! ── DEEP LINK ──────────────────────────────────────────── }}
+    <div class="pf-row">
+      <span class="p-key">PhishFort:</span>
+      <span class="p-value">
+        <a href="https://dashboard.phishfort.com/incidents/{{details.incidentId}}" class="pf-deep-link" target="_blank" rel="noopener noreferrer">
+          {{fa-icon "external-link-alt" fixedWidth=true}} Open in Dashboard
+        </a>
+      </span>
+    </div>
+
+    {{! ── STATUS + INCIDENT STATE ROW ───────────────────────── }}
+    <div class="pf-row">
+      <span class="p-key">Status:</span>
+      <span class="p-value">
+        <span class="pf-status-pill {{details.statusClass}}">{{details.statusLabel}}</span>
+      </span>
+    </div>
+    <div class="pf-row">
+      <span class="p-key">Site State:</span>
+      <span class="p-value pf-incident-state">{{details.incidentStateLabel}}</span>
+    </div>
+    {{#if details.incidentStateMessage}}
+      <div class="pf-row pf-meta-row">
+        <span class="p-key">State Note:</span>
+        <span class="p-value pf-meta-value">{{details.incidentStateMessage}}</span>
+      </div>
+    {{/if}}
+
+    {{! ── INFO GRID ───────────────────────────────────────────── }}
+    <div class="pf-row">
+      <span class="p-key">Class:</span>
+      <span class="p-value">{{details.incidentClass}}</span>
+    </div>
+    <div class="pf-row">
+      <span class="p-key">Type:</span>
+      <span class="p-value">{{details.incidentType}}</span>
+    </div>
+    {{#if details.safeDomain}}
+      <div class="pf-row">
+        <span class="p-key">Protected Brand:</span>
+        <span class="p-value">{{details.safeDomain}}</span>
+      </div>
+    {{/if}}
+    {{#if details.registrarName}}
+      <div class="pf-row">
+        <span class="p-key">Registrar:</span>
+        <span class="p-value">{{details.registrarName}}</span>
+      </div>
+    {{/if}}
+    {{#if details.hostingProvider}}
+      <div class="pf-row">
+        <span class="p-key">Hosting:</span>
+        <span class="p-value">{{details.hostingProvider}}</span>
+      </div>
+    {{/if}}
+    {{#if details.waitForClient}}
+      <div class="pf-row pf-meta-row">
+        <span class="p-key">Waiting:</span>
+        <span class="p-value pf-meta-value">{{details.waitForClient}}</span>
+      </div>
+    {{/if}}
+    <div class="pf-row pf-meta-row">
+      <span class="p-key">Client ID:</span>
+      <span class="p-value pf-meta-value">{{details.clientId}}</span>
+    </div>
+    <div class="pf-row pf-meta-row">
+      <span class="p-key">Source:</span>
+      <span class="p-value pf-meta-value">{{details.source}}</span>
+    </div>
+    {{#if details.reportedBy}}
+      <div class="pf-row pf-meta-row">
+        <span class="p-key">Reported By:</span>
+        <span class="p-value pf-meta-value">{{details.reportedBy}}</span>
+      </div>
+    {{/if}}
+
+    {{! ── TIMELINE ────────────────────────────────────────────── }}
+    <div class="pf-section-header">
+      <span class="p-title">{{fa-icon "stream" fixedWidth=true}} Timeline</span>
+    </div>
+    <div class="pf-timeline">
+      <div class="pf-timeline-step {{if (gte details.timelineStep 1) "pf-step-active"}}">
+        <div class="pf-step-dot"></div>
+        <div class="pf-step-label">Reported</div>
+        <div class="pf-step-date">{{details.reportedDate}}</div>
+      </div>
+      <div class="pf-timeline-connector {{if (gte details.timelineStep 2) "pf-connector-active"}}"></div>
+      <div class="pf-timeline-step {{if (gte details.timelineStep 2) "pf-step-active"}}">
+        <div class="pf-step-dot"></div>
+        <div class="pf-step-label">Case Building</div>
+        <div class="pf-step-date">—</div>
+      </div>
+      <div class="pf-timeline-connector {{if (gte details.timelineStep 3) "pf-connector-active"}}"></div>
+      <div class="pf-timeline-step {{if (gte details.timelineStep 3) "pf-step-active"}}">
+        <div class="pf-step-dot"></div>
+        <div class="pf-step-label">Takedown Started</div>
+        <div class="pf-step-date">{{details.burnStartedDate}}</div>
+      </div>
+      <div class="pf-timeline-connector {{if (gte details.timelineStep 4) "pf-connector-active"}}"></div>
+      <div class="pf-timeline-step {{if (gte details.timelineStep 4) "pf-step-active"}}">
+        <div class="pf-step-dot"></div>
+        <div class="pf-step-label">Takedown Complete</div>
+        <div class="pf-step-date">{{details.takedownDate}}</div>
+      </div>
+    </div>
+
+    {{! ── THREAT TAXONOMY ─────────────────────────────────────── }}
+    {{#if hasTaxonomy}}
+      <div class="pf-section-header">
+        <span class="p-title">{{fa-icon "tag" fixedWidth=true}} Threat Taxonomy</span>
+      </div>
+      <div class="pf-row">
+        <span class="p-key">Name:</span>
+        <span class="p-value">{{details.taxonomyName}}</span>
+      </div>
+      {{#if details.taxonomyThreatType}}
+        {{#if (not (eq details.taxonomyThreatType "Unknown"))}}
+          <div class="pf-row">
+            <span class="p-key">Threat Type:</span>
+            <span class="p-value">{{details.taxonomyThreatType}}</span>
+          </div>
+        {{/if}}
+      {{/if}}
+      {{#if details.taxonomyTargetType}}
+        {{#if (not (eq details.taxonomyTargetType "Unknown"))}}
+          <div class="pf-row">
+            <span class="p-key">Target Type:</span>
+            <span class="p-value">{{details.taxonomyTargetType}}</span>
+          </div>
+        {{/if}}
+      {{/if}}
+    {{/if}}
+
+  {{else}}
+
+    {{! ── NO INCIDENT VIEW ────────────────────────────────────── }}
+    <div class="pf-no-incident">
+      {{fa-icon "info-circle" fixedWidth=true}} {{details.noIncidentMsg}}
+    </div>
+
+  {{/if}}
+
+  {{! ── ACTION BAR (always rendered) ──────────────────────────── }}
+  <div class="pf-action-bar">
+
+    {{! Takedown button }}
+    {{#if block._state.confirmTakedown}}
+      <div class="pf-confirm-box">
+        <span class="pf-confirm-msg">Submit <strong>{{details.entityValue}}</strong> for takedown?</span>
+        <div class="pf-confirm-actions">
+          <button class="pf-btn pf-btn-danger" {{action "confirmTakedown"}} disabled={{block._state.loadingTakedown}}>
+            {{#if block._state.loadingTakedown}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}
+          </button>
+          <button class="pf-btn pf-btn-secondary" {{action "cancelTakedown"}}>Cancel</button>
+        </div>
+      </div>
+    {{else}}
+      <button class="pf-btn pf-btn-danger" {{action "openConfirmTakedown"}} disabled={{block._state.loadingTakedown}}>
+        {{#if block._state.loadingTakedown}}
+          {{fa-icon "spinner" spin=true fixedWidth=true}} Working…
+        {{else}}
+          {{fa-icon "exclamation-triangle" fixedWidth=true}} {{takedownLabel}}
+        {{/if}}
+      </button>
+    {{/if}}
+    {{#if block._state.takedownMsg}}
+      <div class="pf-action-error">{{block._state.takedownMsg}}</div>
+    {{/if}}
+
+    {{! Monitor button }}
+    {{#if block._state.confirmMonitor}}
+      <div class="pf-confirm-box">
+        <span class="pf-confirm-msg">Submit <strong>{{details.entityValue}}</strong> for monitoring?</span>
+        <div class="pf-confirm-actions">
+          <button class="pf-btn pf-btn-blue" {{action "confirmMonitor"}} disabled={{block._state.loadingMonitor}}>
+            {{#if block._state.loadingMonitor}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}
+          </button>
+          <button class="pf-btn pf-btn-secondary" {{action "cancelMonitor"}}>Cancel</button>
+        </div>
+      </div>
+    {{else}}
+      <button class="pf-btn pf-btn-blue" {{action "openConfirmMonitor"}} disabled={{block._state.loadingMonitor}}>
+        {{#if block._state.loadingMonitor}}
+          {{fa-icon "spinner" spin=true fixedWidth=true}} Working…
+        {{else}}
+          {{fa-icon "eye" fixedWidth=true}} {{monitorLabel}}
+        {{/if}}
+      </button>
+    {{/if}}
+    {{#if block._state.monitorMsg}}
+      <div class="pf-action-error">{{block._state.monitorMsg}}</div>
+    {{/if}}
+
+    {{! Mark Safe button — only enabled when incident exists }}
+    {{#if block._state.confirmMarkSafe}}
+      <div class="pf-confirm-box">
+        <span class="pf-confirm-msg">Mark <strong>{{details.entityValue}}</strong> as safe?</span>
+        <div class="pf-confirm-actions">
+          <button class="pf-btn pf-btn-success" {{action "confirmMarkSafe"}} disabled={{block._state.loadingMarkSafe}}>
+            {{#if block._state.loadingMarkSafe}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}
+          </button>
+          <button class="pf-btn pf-btn-secondary" {{action "cancelMarkSafe"}}>Cancel</button>
+        </div>
+      </div>
+    {{else}}
+      <button
+        class="pf-btn pf-btn-success"
+        {{action "openConfirmMarkSafe"}}
+        disabled={{not details.hasIncident}}>
+        {{#if block._state.loadingMarkSafe}}
+          {{fa-icon "spinner" spin=true fixedWidth=true}} Working…
+        {{else}}
+          {{fa-icon "check-circle" fixedWidth=true}} Mark Safe
+        {{/if}}
+      </button>
+    {{/if}}
+    {{#if block._state.markSafeMsg}}
+      <div class="pf-action-error">{{block._state.markSafeMsg}}</div>
+    {{/if}}
+
+    {{! Add Comment button — only enabled when incident exists }}
+    <button
+      class="pf-btn pf-btn-secondary"
+      {{action "openCommentModal"}}
+      disabled={{not details.hasIncident}}>
+      {{fa-icon "comment" fixedWidth=true}} Add Comment
+    </button>
+
+  </div>
+
+  {{! ── COMMENT MODAL ───────────────────────────────────────────── }}
+  {{#if block._state.showCommentModal}}
+    <div class="pf-modal-overlay">
+      <div class="pf-modal">
+        <div class="pf-modal-header">
+          <span class="p-title">{{fa-icon "comment" fixedWidth=true}} Add Comment</span>
+        </div>
+        <div class="pf-modal-body">
+          <textarea
+            class="pf-comment-input"
+            placeholder="Enter your comment…"
+            value={{block._state.commentText}}
+            oninput={{action "updateComment" value="target.value"}}
+            rows="4">
+          </textarea>
+          {{#if block._state.commentMsg}}
+            <div class="pf-action-error">{{block._state.commentMsg}}</div>
+          {{/if}}
+        </div>
+        <div class="pf-modal-footer">
+          <button class="pf-btn pf-btn-primary" {{action "submitComment"}} disabled={{block._state.loadingComment}}>
+            {{#if block._state.loadingComment}}
+              {{fa-icon "spinner" spin=true fixedWidth=true}} Submitting…
+            {{else}}
+              Submit Comment
+            {{/if}}
+          </button>
+          <button class="pf-btn pf-btn-secondary" {{action "closeCommentModal"}}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+
+  {{! ── COLLAPSIBLE: INCIDENT HISTORY ──────────────────────────── }}
+  {{#if hasHistory}}
+    <div class="pf-section-toggle" {{action "toggleSection" "History"}}>
+      <span class="p-title">
+        {{fa-icon "history" fixedWidth=true}}
+        Incident History
+        <span class="pf-count">({{details.history.length}})</span>
+      </span>
+      <span class="pf-chevron">
+        {{#if block._state.showHistory}}
+          {{fa-icon "chevron-up"}}
+        {{else}}
+          {{fa-icon "chevron-down"}}
+        {{/if}}
+      </span>
+    </div>
+    {{#if block._state.showHistory}}
+      <div class="pf-section-body">
+        {{#each details.history as |entry|}}
+          <div class="pf-history-entry">
+            <span class="pf-history-date">{{entry.date}}</span>
+            <span class="pf-history-event">{{entry.event}}</span>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+  {{/if}}
+
+</div>
