@@ -152,6 +152,13 @@
     {{#if block._state.confirmTakedown}}
       <div class="pf-confirm-box">
         <span class="pf-confirm-msg">Submit <strong>{{details.entityValue}}</strong> for takedown?</span>
+        <textarea
+          class="pf-comment-input pf-confirm-comment"
+          placeholder="Optional comment…"
+          value={{block._state.takedownComment}}
+          oninput={{action "updateTakedownComment" value="target.value"}}
+          rows="2">
+        </textarea>
         <div class="pf-confirm-actions">
           <button class="pf-btn pf-btn-danger" {{action "confirmTakedown"}} disabled={{block._state.loadingTakedown}}>
             {{#if block._state.loadingTakedown}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}
@@ -176,6 +183,13 @@
     {{#if block._state.confirmMonitor}}
       <div class="pf-confirm-box">
         <span class="pf-confirm-msg">Submit <strong>{{details.entityValue}}</strong> for monitoring?</span>
+        <textarea
+          class="pf-comment-input pf-confirm-comment"
+          placeholder="Optional comment…"
+          value={{block._state.monitorComment}}
+          oninput={{action "updateMonitorComment" value="target.value"}}
+          rows="2">
+        </textarea>
         <div class="pf-confirm-actions">
           <button class="pf-btn pf-btn-blue" {{action "confirmMonitor"}} disabled={{block._state.loadingMonitor}}>
             {{#if block._state.loadingMonitor}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}

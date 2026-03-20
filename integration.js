@@ -132,9 +132,21 @@ const onMessage = async (payload, options, cb) => {
             uri: `/v1/incident/${encodeURIComponent(incidentId)}/tkd`,
             options
           });
+          // If an optional comment was included, post it too
+          if (comment && String(comment).trim().length > 0) {
+            await requestWithDefaults({
+              method: 'POST',
+              uri: `/v1/incident/${encodeURIComponent(incidentId)}/comment`,
+              body: { comment: String(comment).trim() },
+              options
+            });
+          }
         } else {
-          // New incident
+          // New incident — include optional comment in body if provided
           const body = { subject: entityValue, incidentType: incidentType || 'domain' };
+          if (comment && String(comment).trim().length > 0) {
+            body.comment = String(comment).trim();
+          }
           await requestWithDefaults({
             method: 'POST',
             uri: '/v1/incident/tkd',
@@ -155,8 +167,21 @@ const onMessage = async (payload, options, cb) => {
             uri: `/v1/incident/${encodeURIComponent(incidentId)}/monitor`,
             options
           });
+          // If an optional comment was included, post it too
+          if (comment && String(comment).trim().length > 0) {
+            await requestWithDefaults({
+              method: 'POST',
+              uri: `/v1/incident/${encodeURIComponent(incidentId)}/comment`,
+              body: { comment: String(comment).trim() },
+              options
+            });
+          }
         } else {
+          // New incident — include optional comment in body if provided
           const body = { subject: entityValue, incidentType: incidentType || 'domain' };
+          if (comment && String(comment).trim().length > 0) {
+            body.comment = String(comment).trim();
+          }
           await requestWithDefaults({
             method: 'POST',
             uri: '/v1/incident/monitor',

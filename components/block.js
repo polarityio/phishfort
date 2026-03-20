@@ -47,6 +47,8 @@ polarity.export = PolarityComponent.extend({
         // confirmation modal flags
         confirmTakedown: false,
         confirmMonitor: false,
+        takedownComment: '',
+        monitorComment: '',
         confirmMarkSafe: false,
         showCommentModal: false,
         // inline error/success messages per action
@@ -85,6 +87,7 @@ polarity.export = PolarityComponent.extend({
     },
     cancelTakedown() {
       this.set('block._state.confirmTakedown', false);
+      this.set('block._state.takedownComment', '');
     },
 
     openConfirmMonitor() {
@@ -92,6 +95,7 @@ polarity.export = PolarityComponent.extend({
     },
     cancelMonitor() {
       this.set('block._state.confirmMonitor', false);
+      this.set('block._state.monitorComment', '');
     },
 
     openConfirmMarkSafe() {
@@ -120,8 +124,10 @@ polarity.export = PolarityComponent.extend({
         action: 'SUBMIT_TAKEDOWN',
         entityValue: this.get('details.entityValue'),
         incidentId: this.get('details.incidentId'),
-        incidentType: this.get('details.incidentType')
+        incidentType: this.get('details.incidentType'),
+        comment: (this.get('block._state.takedownComment') || '').trim()
       };
+      this.set('block._state.takedownComment', '');
 
       this.sendIntegrationMessage(payload)
         .then((response) => {
@@ -145,8 +151,10 @@ polarity.export = PolarityComponent.extend({
         action: 'SUBMIT_MONITOR',
         entityValue: this.get('details.entityValue'),
         incidentId: this.get('details.incidentId'),
-        incidentType: this.get('details.incidentType')
+        incidentType: this.get('details.incidentType'),
+        comment: (this.get('block._state.monitorComment') || '').trim()
       };
+      this.set('block._state.monitorComment', '');
 
       this.sendIntegrationMessage(payload)
         .then((response) => {
@@ -221,6 +229,14 @@ polarity.export = PolarityComponent.extend({
 
     updateComment(value) {
       this.set('block._state.commentText', value);
+    },
+
+    updateTakedownComment(value) {
+      this.set('block._state.takedownComment', value);
+    },
+
+    updateMonitorComment(value) {
+      this.set('block._state.monitorComment', value);
     }
   }
 });
