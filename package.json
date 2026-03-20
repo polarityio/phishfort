@@ -1,6 +1,6 @@
 {
   "name": "polarity-phishfort",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Polarity integration for PhishFort domain takedown and incident management",
   "main": "integration.js",
   "scripts": {

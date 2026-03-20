@@ -118,6 +118,25 @@ const _refreshEntity = async (entityValue, entityType, options) => {
   return { summary: buildSummary(transformed), details: transformed };
 };
 
+/**
+ * Builds the correct POST body for new incident creation based on entity type.
+ *
+ * PhishFort API rule: the 'subject' field only accepts incidentType values of
+ * 'ipv4', 'email', or 'phone'. Domain and URL entities must use the 'url' field
+ * instead — sending incidentType: 'domain' will result in a 400 error.
+ *
+ * @param {string} entityValue
+ * @param {string} incidentType - from getIncidentType(): 'ipv4'|'email'|'domain'|'url'
+ * @returns {Object} body ready for POST
+ */
+const _buildNewIncidentBody = (entityValue, incidentType) => {
+  if (incidentType === 'ipv4' || incidentType === 'email' || incidentType === 'phone') {
+    return { subject: entityValue, incidentType };
+  }
+  // domain and url entities: use 'url' field — 'subject' only accepts ipv4/email/phone
+  return { url: entityValue };
+};
+
 const onMessage = async (payload, options, cb) => {
   const { action, entityValue, entityType, incidentId, incidentType, comment } = payload;
   Logger.info({ action, entityValue, incidentId }, 'PhishFort onMessage');
@@ -142,8 +161,10 @@ const onMessage = async (payload, options, cb) => {
             });
           }
         } else {
-          // New incident — include optional comment in body if provided
-          const body = { subject: entityValue, incidentType: incidentType || 'domain' };
+          // New incident — body shape depends on entity type.
+          // 'subject' + 'incidentType' is only valid for: ipv4, email, phone.
+          // Domain and URL entities must use the 'url' field (no incidentType).
+          const body = _buildNewIncidentBody(entityValue, incidentType);
           if (comment && String(comment).trim().length > 0) {
             body.comment = String(comment).trim();
           }
@@ -177,8 +198,10 @@ const onMessage = async (payload, options, cb) => {
             });
           }
         } else {
-          // New incident — include optional comment in body if provided
-          const body = { subject: entityValue, incidentType: incidentType || 'domain' };
+          // New incident — body shape depends on entity type.
+          // 'subject' + 'incidentType' is only valid for: ipv4, email, phone.
+          // Domain and URL entities must use the 'url' field (no incidentType).
+          const body = _buildNewIncidentBody(entityValue, incidentType);
           if (comment && String(comment).trim().length > 0) {
             body.comment = String(comment).trim();
           }
