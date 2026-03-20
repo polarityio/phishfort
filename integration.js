@@ -138,12 +138,51 @@ const _buildNewIncidentBody = (entityValue, incidentType) => {
 };
 
 const onMessage = async (payload, options, cb) => {
-  const { action, entityValue, entityType, incidentId, incidentType, comment } = payload;
+  const { action, entityValue, entityType, incidentId, incidentType, comment,
+          takedownIncidentType, takedownOriginalUrl, takedownDescription,
+          takedownReporterName, takedownReporterEmail, takedownReporterPhone } = payload;
   Logger.info({ action, entityValue, incidentId }, 'PhishFort onMessage');
 
   try {
     switch (action) {
       case 'SUBMIT_TAKEDOWN': {
+        // Destructure all takedown form fields from the payload
+        const {
+          takedownIncidentType,
+          takedownOriginalUrl,
+          takedownDescription,
+          takedownReporterName,
+          takedownReporterEmail,
+          takedownReporterPhone
+        } = payload;
+
+        // Build a structured comment from the form fields so the full context
+        // is preserved in the PhishFort incident regardless of which API path is taken.
+        const structuredLines = ['--- Takedown Request Form ---'];
+        if (takedownIncidentType && takedownIncidentType.length > 0) {
+          structuredLines.push(`Incident Type: ${takedownIncidentType.join(', ')}`);
+        }
+        if (takedownOriginalUrl) {
+          structuredLines.push(`Original/Legitimate URL: ${takedownOriginalUrl}`);
+        }
+        if (takedownDescription) {
+          structuredLines.push(`Description: ${takedownDescription}`);
+        }
+        if (takedownReporterName || takedownReporterEmail) {
+          const reporter = [takedownReporterName, takedownReporterEmail ? `<${takedownReporterEmail}>` : '']
+            .filter(Boolean)
+            .join(' ');
+          structuredLines.push(`Reporter: ${reporter}`);
+        }
+        if (takedownReporterPhone) {
+          structuredLines.push(`Phone: ${takedownReporterPhone}`);
+        }
+        structuredLines.push('---');
+        if (comment && String(comment).trim().length > 0) {
+          structuredLines.push(String(comment).trim());
+        }
+        const fullComment = structuredLines.join('\n');
+
         if (incidentId) {
           // Existing incident — request takedown on existing
           await requestWithDefaults({
@@ -151,23 +190,19 @@ const onMessage = async (payload, options, cb) => {
             uri: `/v1/incident/${encodeURIComponent(incidentId)}/tkd`,
             options
           });
-          // If an optional comment was included, post it too
-          if (comment && String(comment).trim().length > 0) {
-            await requestWithDefaults({
-              method: 'POST',
-              uri: `/v1/incident/${encodeURIComponent(incidentId)}/comment`,
-              body: { comment: String(comment).trim() },
-              options
-            });
-          }
+          // Post the structured form data as a comment on the incident
+          await requestWithDefaults({
+            method: 'POST',
+            uri: `/v1/incident/${encodeURIComponent(incidentId)}/comment`,
+            body: { comment: fullComment },
+            options
+          });
         } else {
           // New incident — body shape depends on entity type.
           // 'subject' + 'incidentType' is only valid for: ipv4, email, phone.
           // Domain and URL entities must use the 'url' field (no incidentType).
           const body = _buildNewIncidentBody(entityValue, incidentType);
-          if (comment && String(comment).trim().length > 0) {
-            body.comment = String(comment).trim();
-          }
+          body.comment = fullComment;
           await requestWithDefaults({
             method: 'POST',
             uri: '/v1/incident/tkd',

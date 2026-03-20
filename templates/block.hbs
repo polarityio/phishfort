@@ -150,18 +150,148 @@
 
     {{! Takedown button }}
     {{#if block._state.confirmTakedown}}
-      <div class="pf-confirm-box">
-        <span class="pf-confirm-msg">Submit <strong>{{details.entityValue}}</strong> for takedown?</span>
-        <textarea
-          class="pf-comment-input pf-confirm-comment"
-          placeholder="Optional comment…"
-          value={{block._state.takedownComment}}
-          oninput={{action "updateTakedownComment" value="target.value"}}
-          rows="2">
-        </textarea>
+      <div class="pf-confirm-box pf-takedown-form">
+        {{! Header }}
+        <div class="pf-form-header">
+          {{fa-icon "exclamation-triangle" fixedWidth=true}}
+          Takedown Request: <strong>{{details.entityValue}}</strong>
+        </div>
+
+        {{! Incident Type — checkboxes }}
+        <div class="pf-form-section-label">
+          Incident Type <span class="pf-required">*</span>
+        </div>
+        <div class="pf-checkbox-grid">
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypePhishing}} onchange={{action "toggleTakedownIncidentType" "phishing"}}>
+            Phishing
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeScam}} onchange={{action "toggleTakedownIncidentType" "scam"}}>
+            Scam
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeImpersonation}} onchange={{action "toggleTakedownIncidentType" "impersonation"}}>
+            Impersonation
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeMalware}} onchange={{action "toggleTakedownIncidentType" "malware"}}>
+            Malware
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeBrandabuse}} onchange={{action "toggleTakedownIncidentType" "brandabuse"}}>
+            Brand Abuse
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeCopyright}} onchange={{action "toggleTakedownIncidentType" "copyright"}}>
+            Copyright
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeTrademark}} onchange={{action "toggleTakedownIncidentType" "trademark"}}>
+            Trademark
+          </label>
+          <label class="pf-checkbox-label">
+            <input type="checkbox" checked={{block._state.takedownTypeOther}} onchange={{action "toggleTakedownIncidentType" "other"}}>
+            Other
+          </label>
+        </div>
+
+        {{! Malicious URL — pre-filled and read-only }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">
+            Infringing/Malicious URL <span class="pf-required">*</span>
+          </label>
+          <input
+            type="text"
+            class="pf-text-input"
+            value={{details.entityValue}}
+            readonly="readonly">
+        </div>
+
+        {{! Original / Legitimate URL }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">
+            Original/Legitimate URL <span class="pf-required">*</span>
+          </label>
+          <input
+            type="text"
+            class="pf-text-input"
+            placeholder="https://yourcompany.com"
+            value={{block._state.takedownOriginalUrl}}
+            oninput={{action "updateTakedownOriginalUrl" value="target.value"}}>
+        </div>
+
+        {{! Incident Description }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">
+            Description of Incident <span class="pf-required">*</span>
+          </label>
+          <textarea
+            class="pf-comment-input"
+            placeholder="Describe what was stolen, logos/images involved, and how the impersonation occurred…"
+            value={{block._state.takedownDescription}}
+            oninput={{action "updateTakedownDescription" value="target.value"}}
+            rows="3">
+          </textarea>
+        </div>
+
+        {{! Reporter Name }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">
+            Reporter Name <span class="pf-required">*</span>
+          </label>
+          <input
+            type="text"
+            class="pf-text-input"
+            placeholder="Full Name"
+            value={{block._state.takedownReporterName}}
+            oninput={{action "updateTakedownReporterName" value="target.value"}}>
+        </div>
+
+        {{! Reporter Email }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">
+            Reporter Email <span class="pf-required">*</span>
+          </label>
+          <input
+            type="text"
+            class="pf-text-input"
+            placeholder="work@company.com"
+            value={{block._state.takedownReporterEmail}}
+            oninput={{action "updateTakedownReporterEmail" value="target.value"}}>
+        </div>
+
+        {{! Contact Number (optional) }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">Contact Number</label>
+          <input
+            type="text"
+            class="pf-text-input"
+            placeholder="Phone (optional)"
+            value={{block._state.takedownReporterPhone}}
+            oninput={{action "updateTakedownReporterPhone" value="target.value"}}>
+        </div>
+
+        {{! Additional Notes (optional) }}
+        <div class="pf-form-field">
+          <label class="pf-form-label">Additional Notes</label>
+          <textarea
+            class="pf-comment-input"
+            placeholder="Optional additional notes…"
+            value={{block._state.takedownComment}}
+            oninput={{action "updateTakedownComment" value="target.value"}}
+            rows="2">
+          </textarea>
+        </div>
+
+        {{! Inline validation error }}
+        {{#if block._state.takedownMsg}}
+          <div class="pf-action-error pf-form-error">{{block._state.takedownMsg}}</div>
+        {{/if}}
+
         <div class="pf-confirm-actions">
           <button class="pf-btn pf-btn-danger" {{action "confirmTakedown"}} disabled={{block._state.loadingTakedown}}>
-            {{#if block._state.loadingTakedown}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Confirm{{/if}}
+            {{#if block._state.loadingTakedown}}{{fa-icon "spinner" spin=true fixedWidth=true}}{{else}}Submit Takedown{{/if}}
           </button>
           <button class="pf-btn pf-btn-secondary" {{action "cancelTakedown"}}>Cancel</button>
         </div>

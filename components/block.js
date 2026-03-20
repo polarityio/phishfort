@@ -58,7 +58,23 @@ polarity.export = PolarityComponent.extend({
         commentMsg: null,
         commentSuccess: null,
         // comment textarea value
-        commentText: ''
+        commentText: '',
+        // ── Takedown form fields ─────────────────────────────────────────────
+        // Incident type checkboxes (individual booleans — Handlebars-compatible)
+        takedownTypePhishing: false,
+        takedownTypeScam: false,
+        takedownTypeImpersonation: false,
+        takedownTypeMalware: false,
+        takedownTypeBrandabuse: false,
+        takedownTypeCopyright: false,
+        takedownTypeTrademark: false,
+        takedownTypeOther: false,
+        // Form text fields
+        takedownOriginalUrl: '',
+        takedownDescription: '',
+        takedownReporterName: '',
+        takedownReporterEmail: '',
+        takedownReporterPhone: ''
       });
     }
   },
@@ -88,6 +104,22 @@ polarity.export = PolarityComponent.extend({
     cancelTakedown() {
       this.set('block._state.confirmTakedown', false);
       this.set('block._state.takedownComment', '');
+      this.set('block._state.takedownMsg', null);
+      // Reset incident type checkboxes
+      this.set('block._state.takedownTypePhishing', false);
+      this.set('block._state.takedownTypeScam', false);
+      this.set('block._state.takedownTypeImpersonation', false);
+      this.set('block._state.takedownTypeMalware', false);
+      this.set('block._state.takedownTypeBrandabuse', false);
+      this.set('block._state.takedownTypeCopyright', false);
+      this.set('block._state.takedownTypeTrademark', false);
+      this.set('block._state.takedownTypeOther', false);
+      // Reset text fields
+      this.set('block._state.takedownOriginalUrl', '');
+      this.set('block._state.takedownDescription', '');
+      this.set('block._state.takedownReporterName', '');
+      this.set('block._state.takedownReporterEmail', '');
+      this.set('block._state.takedownReporterPhone', '');
     },
 
     openConfirmMonitor() {
@@ -116,18 +148,85 @@ polarity.export = PolarityComponent.extend({
 
     // ── Action: Submit Takedown ───────────────────────────────────────────────
     confirmTakedown() {
+      const s = this.get('block._state');
+
+      // Collect selected incident types from individual boolean flags
+      const typeMap = [
+        ['phishing',      s.takedownTypePhishing],
+        ['scam',          s.takedownTypeScam],
+        ['impersonation', s.takedownTypeImpersonation],
+        ['malware',       s.takedownTypeMalware],
+        ['brandabuse',    s.takedownTypeBrandabuse],
+        ['copyright',     s.takedownTypeCopyright],
+        ['trademark',     s.takedownTypeTrademark],
+        ['other',         s.takedownTypeOther]
+      ];
+      const selectedTypes = typeMap.filter(([, checked]) => checked).map(([type]) => type);
+
+      // Normalise text field values
+      const originalUrl    = (s.takedownOriginalUrl    || '').trim();
+      const description    = (s.takedownDescription    || '').trim();
+      const reporterName   = (s.takedownReporterName   || '').trim();
+      const reporterEmail  = (s.takedownReporterEmail  || '').trim();
+      const reporterPhone  = (s.takedownReporterPhone  || '').trim();
+      const additionalNote = (s.takedownComment        || '').trim();
+
+      // ── Client-side validation ──────────────────────────────────────────────
+      if (selectedTypes.length === 0) {
+        this.set('block._state.takedownMsg', 'Please select at least one incident type.');
+        return;
+      }
+      if (!originalUrl) {
+        this.set('block._state.takedownMsg', 'Original/legitimate URL is required.');
+        return;
+      }
+      if (!description) {
+        this.set('block._state.takedownMsg', 'Incident description is required.');
+        return;
+      }
+      if (!reporterName) {
+        this.set('block._state.takedownMsg', 'Reporter name is required.');
+        return;
+      }
+      if (!reporterEmail || !reporterEmail.includes('@') || !reporterEmail.includes('.')) {
+        this.set('block._state.takedownMsg', 'A valid reporter email address is required.');
+        return;
+      }
+
+      // ── All valid — close form and dispatch ─────────────────────────────────
       this.set('block._state.confirmTakedown', false);
       this.set('block._state.loadingTakedown', true);
       this.set('block._state.takedownMsg', null);
 
       const payload = {
         action: 'SUBMIT_TAKEDOWN',
-        entityValue: this.get('details.entityValue'),
-        incidentId: this.get('details.incidentId'),
-        incidentType: this.get('details.incidentType'),
-        comment: (this.get('block._state.takedownComment') || '').trim()
+        entityValue:          this.get('details.entityValue'),
+        incidentId:           this.get('details.incidentId'),
+        incidentType:         this.get('details.incidentType'),
+        takedownIncidentType: selectedTypes,
+        takedownOriginalUrl:  originalUrl,
+        takedownDescription:  description,
+        takedownReporterName: reporterName,
+        takedownReporterEmail: reporterEmail,
+        takedownReporterPhone: reporterPhone,
+        comment:              additionalNote
       };
+
+      // Reset all form fields
       this.set('block._state.takedownComment', '');
+      this.set('block._state.takedownTypePhishing', false);
+      this.set('block._state.takedownTypeScam', false);
+      this.set('block._state.takedownTypeImpersonation', false);
+      this.set('block._state.takedownTypeMalware', false);
+      this.set('block._state.takedownTypeBrandabuse', false);
+      this.set('block._state.takedownTypeCopyright', false);
+      this.set('block._state.takedownTypeTrademark', false);
+      this.set('block._state.takedownTypeOther', false);
+      this.set('block._state.takedownOriginalUrl', '');
+      this.set('block._state.takedownDescription', '');
+      this.set('block._state.takedownReporterName', '');
+      this.set('block._state.takedownReporterEmail', '');
+      this.set('block._state.takedownReporterPhone', '');
 
       this.sendIntegrationMessage(payload)
         .then((response) => {
@@ -237,6 +336,37 @@ polarity.export = PolarityComponent.extend({
 
     updateMonitorComment(value) {
       this.set('block._state.monitorComment', value);
+    },
+
+    // ── Takedown form field updaters ─────────────────────────────────────────
+
+    // Toggle a checkbox in the incident type grid.
+    // `type` is the lowercase type string, e.g. 'phishing', 'scam', 'brandabuse'.
+    // Maps to state keys like takedownTypePhishing, takedownTypeScam, etc.
+    toggleTakedownIncidentType(type) {
+      const capitalized = type.charAt(0).toUpperCase() + type.slice(1);
+      const key = `block._state.takedownType${capitalized}`;
+      this.set(key, !this.get(key));
+    },
+
+    updateTakedownOriginalUrl(value) {
+      this.set('block._state.takedownOriginalUrl', value);
+    },
+
+    updateTakedownDescription(value) {
+      this.set('block._state.takedownDescription', value);
+    },
+
+    updateTakedownReporterName(value) {
+      this.set('block._state.takedownReporterName', value);
+    },
+
+    updateTakedownReporterEmail(value) {
+      this.set('block._state.takedownReporterEmail', value);
+    },
+
+    updateTakedownReporterPhone(value) {
+      this.set('block._state.takedownReporterPhone', value);
     }
   }
 });
